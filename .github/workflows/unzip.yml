@@ -1,0 +1,29 @@
+name: Автоматическая распаковка ZIP
+
+on:
+  push:
+    paths:
+      - '**/*.zip'  # Любой ZIP, который добавишь
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Склонировать репозиторий
+        uses: actions/checkout@v3
+
+      - name: Распаковать ZIP
+        run: |
+          mkdir -p распакованные
+          for zip in *.zip; do
+            unzip -o "$zip" -d распакованные/
+          done
+
+      - name: Добавить файлы в Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add распакованные/
+          git commit -m "Автоматически распакованы файлы из ZIP" || echo "Нет изменений для коммита"
+          git push
